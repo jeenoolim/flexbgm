@@ -3,7 +3,6 @@ import 'package:flextv_bgm_player/constants/AppPages.dart';
 import 'package:flextv_bgm_player/constants/AppRoutes.dart';
 import 'package:flextv_bgm_player/controllers/AuthController.dart';
 import 'package:flextv_bgm_player/controllers/BgmController.dart';
-import 'package:flextv_bgm_player/controllers/EditorController.dart';
 import 'package:flextv_bgm_player/controllers/SigninController.dart';
 import 'package:flextv_bgm_player/firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -32,12 +31,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialBinding: BindingsBuilder(() {
         Get.put(AuthController());
+        Get.put(BgmController());
         Get.lazyPut(() => SigninController(), fenix: true);
-        Get.lazyPut(() => BgmController(), fenix: true);
-        Get.lazyPut(() => EditorController(), fenix: true);
       }),
       getPages: AppPages.pages,
-      initialRoute: AppRoutes.home,
+      initialRoute: AppRoutes.signin,
     );
   }
 }

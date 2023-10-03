@@ -1,50 +1,68 @@
+import 'dart:convert';
+
 class Bgm {
-  final String loginId;
-  final String createdAt;
+  final String? loginId;
   final List<Media> playlist;
   Bgm({
     required this.loginId,
-    required this.createdAt,
     required this.playlist,
   });
 
   factory Bgm.fromMap(Map<String, dynamic> map) {
-    return Bgm(
+    Bgm bgm = Bgm(
       loginId: map['loginId'] as String,
-      createdAt: map['createdAt'] as String,
       playlist: List<Media>.from(
         (map['playlist'] as List<dynamic>).map<Media>(
           (x) => Media.fromMap(x as Map<String, dynamic>),
         ),
       ),
     );
+    return bgm;
   }
-}
 
-enum SourceType {
-  file('file', '파일'),
-  url('url', '온라인');
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'playlist': playlist.map((x) => x.toMap()).toList(),
+      'loginId': loginId,
+    };
+  }
 
-  final String value;
-  final String label;
-  const SourceType(this.value, this.label);
+  String toJson() => json.encode(toMap());
+
+  factory Bgm.fromJson(String source) =>
+      Bgm.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class Media {
-  final SourceType type;
+  final String id;
+  final String type;
   final String source;
   final String name;
-  Media({
-    required this.name,
-    required this.type,
-    required this.source,
-  });
+  final String done;
+  Media(
+      {required this.id,
+      required this.name,
+      required this.type,
+      required this.source,
+      required this.done});
 
   factory Media.fromMap(Map<String, dynamic> map) {
     return Media(
+        id: map['id'] as String,
         name: map['name'] as String,
         source: map['source'] as String,
-        type: SourceType.values.firstWhere((e) => e.value == map['type']));
+        done: map['done'] as String,
+        type: map['type'] as String);
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'source': source,
+      'done': done,
+      'type': type,
+    };
   }
 
   get value => null;

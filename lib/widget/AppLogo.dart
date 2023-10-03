@@ -6,13 +6,14 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return const Row(
       children: [
         Icon(
-          size: 40,
+          size: 20,
           color: Colors.redAccent,
           FontAwesomeIcons.music,
         ),
+        SizedBox(width: 4),
         Text(
           style: TextStyle(
             fontSize: 16,

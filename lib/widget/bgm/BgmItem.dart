@@ -1,4 +1,4 @@
-import 'package:flextv_bgm_player/controllers/EditorController.dart';
+import 'package:flextv_bgm_player/controllers/BgmController.dart';
 import 'package:flextv_bgm_player/model/Bgm.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,7 +9,7 @@ class BgmItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EditorController controller = Get.find<EditorController>();
+    BgmController controller = Get.find<BgmController>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -38,8 +38,12 @@ class BgmItem extends StatelessWidget {
           flex: 1,
           child: PopupMenuButton(
             icon: const Icon(Icons.more_vert),
-            onSelected: (EditingStatus result) =>
-                controller.updateStatus(result),
+            onSelected: (EditingStatus result) => {
+              if (result == EditingStatus.modify)
+                {controller.editItem(item)}
+              else
+                {controller.deleteItem(item)}
+            },
             itemBuilder: (BuildContext context) =>
                 [EditingStatus.modify, EditingStatus.delete]
                     .map((value) => PopupMenuItem(

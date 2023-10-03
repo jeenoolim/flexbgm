@@ -1,5 +1,4 @@
 import 'package:flextv_bgm_player/controllers/BgmController.dart';
-import 'package:flextv_bgm_player/controllers/EditorController.dart';
 import 'package:flextv_bgm_player/model/Bgm.dart';
 import 'package:flextv_bgm_player/widget/bgm/BgmItem.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +24,7 @@ class BgmList extends GetView<BgmController> {
                   const Divider(),
             )),
         floatingActionButton: FloatingActionButton(
-          onPressed: () =>
-              Get.find<EditorController>().updateStatus(EditingStatus.regist),
+          onPressed: () => Get.find<BgmController>().addItem(),
           child: const Icon(Icons.add),
         ));
   }

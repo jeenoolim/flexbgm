@@ -12,7 +12,7 @@ class AuthController extends GetxController {
   final Rxn<User> _user = Rxn(); //유저 정보
   String? _token; //토큰 값
   final Dio dio = ApiService().instance;
-  Rxn<User> get user => _user; //user 정보 읽기
+  User? get user => _user.value; //user 정보 읽기
 
   //로그인
   signin(String id, String pw, bool isLoginInfoSave) async {
@@ -119,7 +119,7 @@ class AuthController extends GetxController {
     super.onInit();
     //splash 화면을 2초동안 보여줌
     Future.delayed(const Duration(seconds: 2), () {
-      // _autoLogin();
+      _autoLogin();
     });
     //유저 정보를 관찰하여 변경된 경우 실행
     ever(_user, _handleAuthChanged);
