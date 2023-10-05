@@ -1,14 +1,9 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flextv_bgm_player/constants/AppRoutes.dart';
 import 'package:flextv_bgm_player/controllers/AuthController.dart';
 import 'package:flextv_bgm_player/model/Bgm.dart';
 import 'package:flextv_bgm_player/model/User.dart';
-import 'package:flextv_bgm_player/screens/Eidtor.dart';
-import 'package:flextv_bgm_player/utils/Util.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
@@ -37,14 +32,13 @@ enum EditingStatus {
 
 class BgmController extends GetxController {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final Rxn<Bgm> _bgm = Rxn();
   final RxList<Media> _items = RxList();
   final Rx<EditingStatus> _status = EditingStatus.done.obs;
   final Rx<SourceType> _sourctType = SourceType.file.obs;
-  final Rxn<String> _errorName = Rxn();
-  final Rxn<String> _errorSource = Rxn();
-
-  User? user = Get.find<AuthController>().user;
+  final Rx<String> _errorName = ''.obs;
+  final Rx<String> _errorSource = ''.obs;
+  Bgm? _bgm;
+  User? _user;
   //이름
   TextEditingController nameController = TextEditingController();
 
@@ -53,8 +47,8 @@ class BgmController extends GetxController {
   //렉스
   TextEditingController doneController = TextEditingController();
 
-  get bgm => _bgm;
-  set bgm(value) => _bgm(value);
+  // get bgm => _bgm;
+  // set bgm(value) => _bgm(value);
 
   get sourceTypes => SourceType.values.toList();
 
@@ -62,7 +56,7 @@ class BgmController extends GetxController {
   set sourceType(value) => _sourctType(value);
 
   get items => _items;
-  set items(value) => _items(value);
+  // set items(value) => _items(value);
 
   get status => _status.value;
   set status(value) => _status(value);
@@ -76,7 +70,8 @@ class BgmController extends GetxController {
   static BgmController get to => Get.find();
 
   addItem() {
-    Get.bottomSheet(const Editor());
+    Get.toNamed(AppRoutes.editor);
+    resetItem();
     _status(EditingStatus.regist);
   }
 
@@ -88,19 +83,20 @@ class BgmController extends GetxController {
     nameController.text = item.name;
     sourceController.text = item.source;
     doneController.text = item.done;
-    sourceType = item.type;
-    Get.bottomSheet(const Editor());
+    sourceType =
+        item.type == SourceType.file.value ? SourceType.file : SourceType.url;
+    Get.toNamed(AppRoutes.editor);
     _status(EditingStatus.modify);
   }
 
   createItem() {
     if (nameController.text.isEmpty) {
       errorName = '브금 이름을 지정 해주세요';
-      throw Exception(errorName.value);
+      return;
     }
     if (sourceController.text.isEmpty) {
       errorSource = '브금 경로를 설정 해주세요.';
-      throw Exception(errorSource.value);
+      return;
     }
     return Media(
         id: uuid.v4(),
@@ -114,43 +110,45 @@ class BgmController extends GetxController {
     nameController.text = '';
     sourceController.text = '';
     doneController.text = '';
-    sourceType = SourceType.file;
+    errorName = '';
+    errorSource = '';
+    sourceType = SourceType.file.value;
   }
 
-  saveItem() async {
-    try {
-      Media? item = createItem();
-      bgm.value.playlist.add(item);
-      debugPrint('${bgm.value.toMap()}');
-      Get.back();
-    } on DioException catch (error) {
-      Util.toast(error.message.toString());
+  saveItem() {
+    Media? item = createItem();
+    if (item == null) {
+      return;
     }
+    _items.add(item);
+    _items.refresh();
+    firestore
+        .collection('bgm')
+        .doc(_user?.id.toString())
+        .update({"playlist": _items.map((e) => e.toMap())});
+    Get.back();
+
     // await firestore.collection('bgm').doc('11222').set(bgm.value.toMap());
   }
 
-  load() async {
-    try {
-      DocumentSnapshot<Map<String, dynamic>> response = await firestore
-          .collection('bgm')
-          .doc(user?.id.toString())
-          // .doc('17483')
-          .get();
+  Future<Bgm> load() async {
+    DocumentSnapshot<Map<String, dynamic>> response = await firestore
+        .collection('bgm')
+        .doc(_user?.id.toString())
+        // .doc('17483')
+        .get();
 
-      dynamic data = response.data();
-      data = data == null
-          ? Bgm(loginId: user?.loginId, playlist: [])
-          : Bgm.fromMap(data);
-      bgm = data;
-      items = data.playlist;
-    } on DioException catch (e) {
-      debugPrint('e: ${e.message}');
-    }
+    Map<String, dynamic>? data = response.data();
+    return Bgm.fromMap(data ?? {});
   }
 
   @override
-  Future<void> onInit() async {
+  onInit() {
     super.onInit();
-    load();
+    Get.find<AuthController>().user.listen((user) async {
+      _user = user;
+      _bgm = await load();
+      _items(_bgm?.playlist ?? []);
+    });
   }
 }

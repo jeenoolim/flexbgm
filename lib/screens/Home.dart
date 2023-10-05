@@ -1,8 +1,6 @@
 // ignore: file_names
-import 'package:flextv_bgm_player/controllers/BgmController.dart';
 import 'package:flextv_bgm_player/widget/bgm/BgmList.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});

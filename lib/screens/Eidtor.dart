@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 class Editor extends GetView<BgmController> {
   const Editor({super.key});
-  // static const route = '/editor';
+  static const route = '/editor';
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +27,11 @@ class Editor extends GetView<BgmController> {
               SizedBox(
                   height: 70,
                   child: TextInput(
-                      hintText: 'BGM 이름',
-                      controller: controller.nameController,
-                      error: controller.errorName)),
+                    controller: controller.nameController,
+                    hintText: 'BGM 이름',
+                    errorText: controller.errorName,
+                    onChanged: (e) => controller.errorName = '',
+                  )),
               const Divider(
                 height: 40,
                 color: Colors.black12,
@@ -60,9 +62,11 @@ class Editor extends GetView<BgmController> {
                   children: [
                     Expanded(
                         child: TextInput(
-                      enabled: controller.sourceType == SourceType.url,
-                      hintText: '음원 경로',
                       controller: controller.sourceController,
+                      enabled: controller.sourceType == SourceType.url,
+                      errorText: controller.errorSource,
+                      onChanged: (e) => controller.errorSource = '',
+                      hintText: '음원 경로',
                     )),
                     const SizedBox(width: 10),
                     SizedBox(
@@ -128,7 +132,7 @@ class Editor extends GetView<BgmController> {
                               backgroundColor:
                                   const Color.fromARGB(255, 59, 59, 59),
                               textStyle: const TextStyle(fontSize: 14)),
-                          onPressed: () => Get.back(),
+                          onPressed: () => Get.back(closeOverlays: true),
                           child: const Text('취소',
                               style: TextStyle(color: Colors.white)),
                         ),

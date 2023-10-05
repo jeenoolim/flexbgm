@@ -1,10 +1,14 @@
 // import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
-  factory ApiService() => _instance;
+  factory ApiService() {
+    debugPrint('${111111}');
+    return _instance;
+  }
   Dio _dio = Dio();
 
   ApiService._internal() {
@@ -37,7 +41,7 @@ class DioInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    debugPrint('err: ${err.message}');
+    debugPrint('err: ${err.toString()}');
     super.onError(err, handler);
   }
 }

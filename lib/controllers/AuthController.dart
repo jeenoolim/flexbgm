@@ -10,9 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
   final Rxn<User> _user = Rxn(); //유저 정보
-  String? _token; //토큰 값
   final Dio dio = ApiService().instance;
-  User? get user => _user.value; //user 정보 읽기
+  String? _token; //토큰 값
+  Rxn<User> get user => _user; //user 정보 읽기
 
   //로그인
   signin(String id, String pw, bool isLoginInfoSave) async {
