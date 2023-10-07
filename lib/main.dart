@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flextv_bgm_player/constants/AppPages.dart';
-import 'package:flextv_bgm_player/constants/AppRoutes.dart';
-import 'package:flextv_bgm_player/controllers/AuthController.dart';
-import 'package:flextv_bgm_player/controllers/BgmController.dart';
-import 'package:flextv_bgm_player/controllers/SigninController.dart';
+import 'package:flextv_bgm_player/constants/app_pages.dart';
+import 'package:flextv_bgm_player/constants/app_routes.dart';
+import 'package:flextv_bgm_player/controllers/auth_controller.dart';
+import 'package:flextv_bgm_player/controllers/bgm_controller.dart';
+import 'package:flextv_bgm_player/controllers/signin_controller.dart';
 import 'package:flextv_bgm_player/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         Get.lazyPut(() => SigninController(), fenix: true);
       }),
       getPages: AppPages.pages,
-      initialRoute: AppRoutes.signin,
+      initialRoute: AppRoutes.home,
     );
   }
 }

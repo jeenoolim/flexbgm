@@ -1,5 +1,6 @@
 // ignore: file_names
-import 'package:flextv_bgm_player/widget/bgm/BgmList.dart';
+import 'package:flextv_bgm_player/widget/app_logo.dart';
+import 'package:flextv_bgm_player/widget/bgm/bgm_list.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatelessWidget {
@@ -10,8 +11,11 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('FLEX BGM'),
+        toolbarHeight: 60,
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.black87,
+        title: const AppLogo(),
       ),
       body: const BgmList(),
     );

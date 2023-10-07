@@ -1,8 +1,7 @@
-import 'package:flextv_bgm_player/constants/AppRoutes.dart';
-import 'package:flextv_bgm_player/controllers/SigninController.dart';
-import 'package:flextv_bgm_player/widget/AppLogo.dart';
-import 'package:flextv_bgm_player/widget/Button.dart';
-import 'package:flextv_bgm_player/widget/TextInput.dart';
+import 'package:flextv_bgm_player/constants/app_routes.dart';
+import 'package:flextv_bgm_player/controllers/signin_controller.dart';
+import 'package:flextv_bgm_player/widget/button.dart';
+import 'package:flextv_bgm_player/widget/text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

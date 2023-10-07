@@ -37,11 +37,9 @@ class Media {
   final String id;
   final String type;
   final String source;
-  final String name;
   final String done;
   Media(
       {required this.id,
-      required this.name,
       required this.type,
       required this.source,
       required this.done});
@@ -49,7 +47,6 @@ class Media {
   factory Media.fromMap(Map<String, dynamic> map) {
     return Media(
         id: map['id'] as String,
-        name: map['name'] as String,
         source: map['source'] as String,
         done: map['done'] as String,
         type: map['type'] as String);
@@ -58,7 +55,6 @@ class Media {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'name': name,
       'source': source,
       'done': done,
       'type': type,
