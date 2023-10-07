@@ -12,6 +12,29 @@ class BgmList extends GetView<BgmController> {
     return Scaffold(
         body: Obx(
           () => ReorderableListView.builder(
+            header: Container(
+              color: Colors.black54,
+              height: 30,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(left: 50),
+                    child: const Text(
+                      '재생목록',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(right: 100),
+                    child: const Text(
+                      '후원',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              ),
+            ),
             itemCount: controller.items.length,
             itemBuilder: (context, index) {
               final Media item = controller.items[index];

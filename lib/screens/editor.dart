@@ -1,4 +1,5 @@
 import 'package:flextv_bgm_player/controllers/bgm_controller.dart';
+import 'package:flextv_bgm_player/widget/audio/player_widget.dart';
 import 'package:flextv_bgm_player/widget/text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,64 +11,68 @@ class Editor extends GetView<BgmController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
-          toolbarHeight: 60,
-          centerTitle: false,
-          automaticallyImplyLeading: true,
-          backgroundColor: Colors.black87,
-          title: const Text('편집',
-              style: TextStyle(color: Colors.white, fontSize: 16))),
-      body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        // margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Obx(
-          () => Column(
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+            leading: const BackButton(color: Colors.white),
+            toolbarHeight: 60,
+            centerTitle: false,
+            automaticallyImplyLeading: true,
+            backgroundColor: Colors.black87,
+            title: Text(
+                controller.status.value == EditingStatus.regist ? '등록' : '편집',
+                style: const TextStyle(color: Colors.white, fontSize: 16))),
+        body: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SegmentedButton<SourceType>(
-                    style: ButtonStyle(
-                      iconColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) =>
-                              states.contains(MaterialState.selected)
-                                  ? Colors.white
-                                  : Colors.redAccent),
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) =>
-                              states.contains(MaterialState.selected)
-                                  ? Colors.black87
-                                  : Colors.white),
-                      foregroundColor: MaterialStateColor.resolveWith(
-                          (Set<MaterialState> states) {
-                        return states.contains(MaterialState.selected)
-                            ? Colors.white
-                            : Colors.black87;
+                      style: ButtonStyle(
+                        iconColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) =>
+                                states.contains(MaterialState.selected)
+                                    ? Colors.white
+                                    : Colors.redAccent),
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) =>
+                                    states.contains(MaterialState.selected)
+                                        ? Colors.black87
+                                        : Colors.white),
+                        foregroundColor: MaterialStateColor.resolveWith(
+                            (Set<MaterialState> states) {
+                          return states.contains(MaterialState.selected)
+                              ? Colors.white
+                              : Colors.black87;
+                        }),
+                      ),
+                      segments: SourceType.values.map((SourceType e) {
+                        return ButtonSegment(
+                            value: SourceType.string(e.value),
+                            label: Text(e.label),
+                            icon: Icon(e.icon));
+                      }).toList(),
+                      selected: <SourceType>{controller.sourceType.value},
+                      onSelectionChanged: (Set<SourceType> newSelection) {
+                        // controller.sourceController.text = '';
+                        controller.sourceType(newSelection.first);
                       }),
-                    ),
-                    segments: SourceType.values.map((SourceType e) {
-                      return ButtonSegment(
-                          value: SourceType.string(e.value),
-                          label: Text(e.label),
-                          icon: Icon(e.icon));
-                    }).toList(),
-                    selected: <SourceType>{controller.sourceType.value},
-                    onSelectionChanged: (Set<SourceType> newSelection) =>
-                        controller.sourceType(newSelection.first),
-                  ),
                   const SizedBox(height: 10),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Flexible(
                         child: TextFormField(
+                          enabled:
+                              controller.sourceType.value != SourceType.file,
                           controller: controller.sourceController,
                           decoration: InputDecoration(
-                            hintText: 'BGM 경로를 지정해 주세요',
+                            hintText: controller.sourceType.value.hint,
                             errorText: controller.errorSource.value,
                             filled: true,
                             fillColor: Colors.white,
@@ -93,7 +98,7 @@ class Editor extends GetView<BgmController> {
                                   borderRadius: BorderRadius.circular(10.0)),
                               minimumSize: const Size(100, 65), //////// HERE
                             ),
-                            onPressed: () {},
+                            onPressed: () => controller.pick(),
                             child: const Text('파일선택'),
                           ),
                         ),
@@ -102,25 +107,15 @@ class Editor extends GetView<BgmController> {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  SizedBox(
-                    child: IconButton(
-                      iconSize: 30,
-                      onPressed: () {
-                        //
-                      },
-                      icon: const Icon(Icons.play_arrow),
-                    ),
-                  ),
-                ],
-              ),
+              Visibility(
+                  visible: controller.source.value != null,
+                  child: PlayerWidget(player: controller.player)),
               const SizedBox(height: 40),
               Column(
                 children: [
                   TextInput(
                     height: 60,
-                    hintText: '후원 갯수 지정',
+                    hintText: '후원 설정',
                     controller: controller.doneController,
                   ),
                 ],
@@ -165,7 +160,7 @@ class Editor extends GetView<BgmController> {
                                   foregroundColor: Colors.black,
                                   backgroundColor: Colors.red,
                                   textStyle: const TextStyle(fontSize: 14)),
-                              onPressed: () => controller.save(Get.arguments),
+                              onPressed: () => controller.delete(Get.arguments),
                               child: const Row(
                                 children: [
                                   Icon(Icons.clear,

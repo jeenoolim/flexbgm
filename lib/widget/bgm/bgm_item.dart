@@ -20,19 +20,24 @@ class BgmItem extends GetView<BgmController> {
                     color: Color.fromARGB(255, 228, 227, 227), width: 1))),
         child: Row(
           children: [
-            IconButton(
-              iconSize: 20,
-              onPressed: () {
-                // play
-              },
-              icon: const Icon(Icons.play_arrow),
-            ),
             Expanded(
                 flex: 7,
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(item.source),
+                  child: Text(item.name),
                 )),
+            Visibility(
+              visible: item.done.isNotEmpty,
+              child: Container(
+                  margin: const EdgeInsets.only(right: 20),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${item.done}개',
+                      textAlign: TextAlign.right,
+                    ),
+                  )),
+            ),
           ],
         ),
       ),

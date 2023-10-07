@@ -1,4 +1,8 @@
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flextv_bgm_player/constants/app_routes.dart';
 import 'package:flextv_bgm_player/controllers/auth_controller.dart';
 import 'package:flextv_bgm_player/model/bgm.dart';
@@ -11,14 +15,17 @@ import 'package:uuid/uuid.dart';
 var uuid = const Uuid();
 
 enum SourceType {
-  file('file', '파일', FontAwesomeIcons.recordVinyl),
-  youtube('youtube', '유튜브', FontAwesomeIcons.youtube),
-  url('url', '주소', Icons.link);
+  file('file', '파일', FontAwesomeIcons.recordVinyl, ''),
+  youtube('youtube', '유튜브', FontAwesomeIcons.youtube,
+      'https://youtu.be/example?feature=shared'),
+  url('url', '주소', Icons.link, 'https://example.com/bgm.mp3');
 
   final String value;
   final String label;
+  final String hint;
   final IconData icon;
-  const SourceType(this.value, this.label, this.icon);
+
+  const SourceType(this.value, this.label, this.icon, this.hint);
 
   static SourceType string(name) =>
       SourceType.values.firstWhere((element) => element.name == name);
@@ -39,9 +46,13 @@ class BgmController extends GetxController {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final Rx<EditingStatus> status = Rx(EditingStatus.done);
   final RxList<Media> items = RxList();
+  final Rxn<Media> editingItem = Rxn();
   final Rx<SourceType> sourceType = Rx(SourceType.file);
-  RxnString errorName = RxnString(null);
+  final RxString name = RxString('제목 없음');
+  final RxnString source = RxnString(null);
+  final RxnString errorName = RxnString(null);
   final RxnString errorSource = RxnString(null);
+  final AudioPlayer audioPlayer = AudioPlayer();
   Bgm? respose;
   User? user;
 
@@ -51,6 +62,13 @@ class BgmController extends GetxController {
   TextEditingController doneController = TextEditingController();
 
   get sourceTypes => SourceType.values.toList();
+  get player {
+    if (sourceType.value.value == SourceType.file.value) {
+      audioPlayer.setSource(DeviceFileSource(sourceController.text));
+      return audioPlayer;
+    }
+    return null;
+  }
 
   static BgmController get to => Get.find();
 
@@ -58,10 +76,6 @@ class BgmController extends GetxController {
     status.value = EditingStatus.regist;
     Get.toNamed(AppRoutes.editor);
     reset();
-  }
-
-  void delete(Media item) {
-    status.value = EditingStatus.delete;
   }
 
   void swap(int oldIndex, int newIndex) {
@@ -78,12 +92,36 @@ class BgmController extends GetxController {
     sourceController.text = item.source;
     doneController.text = item.done;
     sourceType.value = SourceType.string(item.type);
+    editingItem.value = item;
     Get.toNamed(AppRoutes.editor, arguments: id);
+  }
+
+  void delete(String id) {
+    status.value = EditingStatus.delete;
+    items.removeWhere((e) => e.id == id);
+    items.refresh();
+    submit();
+    Get.back();
+  }
+
+  void pick() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav', 'ogg'],
+    );
+    if (result != null) {
+      String path = result.files.single.path!;
+      name.value = basenameWithoutExtension(path);
+      source.value = sourceController.text = path;
+    } else {
+      sourceController.text = '파일 경로를 찾을 수 없습니다.';
+    }
   }
 
   Media create(String? id) {
     return Media(
         id: id ?? uuid.v4(),
+        name: name.value,
         type: sourceType.value.value,
         source: sourceController.text,
         done: doneController.text);
@@ -91,7 +129,7 @@ class BgmController extends GetxController {
 
   bool validation() {
     if (sourceController.text.isEmpty) {
-      errorSource.value = '브금 경로를 설정 해주세요.';
+      errorSource.value = '경로를 설정 해주세요.';
       return false;
     }
     return true;
@@ -105,9 +143,13 @@ class BgmController extends GetxController {
     sourceType(SourceType.file);
   }
 
-  save(String? id) {
+  void save(String? id) {
     if (validation()) {
       Media item = create(id);
+      // 데이터 같으면 저장 안함
+      if (mapEquals(editingItem.value?.toMap(), item.toMap())) {
+        return Get.back();
+      }
       switch (status.value) {
         case EditingStatus.modify:
           int index = items.indexWhere((e) => e.id == item.id);
@@ -120,16 +162,16 @@ class BgmController extends GetxController {
       }
       items.refresh();
       submit();
+      Get.back();
     }
   }
 
-  submit() {
+  void submit() {
     firestore
         .collection('bgm')
         // .doc(user?.id.toString())
         .doc('17483')
-        .update({"playlist": items.map((e) => e.toMap())});
-    Get.back();
+        .update({"playlist": items.map((e) => e.toMap()).toList()});
   }
 
   Future<Bgm> load() async {
